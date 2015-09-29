@@ -9,6 +9,25 @@ var server = OrientDB({
 });
 var db = server.use('Mapper');
 
+
+/////////////// Collections ///////////////
+
+var imageStore = new FS.Store.S3("images", {
+  accessKeyId: Meteor.settings.AWSAccessKeyId, 
+  secretAccessKey: Meteor.settings.AWSSecretAccessKey, 
+  bucket: Meteor.settings.AWSBucket
+});
+
+Images = new FS.Collection("Images", {
+  stores: [imageStore],
+  filter: {
+    allow: {
+      contentTypes: ['image/*']
+    }
+  }
+});
+
+
 /////////////// Startup ///////////////
 
 Meteor.startup(function(){
@@ -70,6 +89,28 @@ Meteor.startup(function(){
     }, 2000);
     return user;
   });
+});
+
+
+/////////////// Allow / Deny ///////////////
+
+Images.allow({
+  insert: function(userId, doc){
+    if(Meteor.users.findOne({_id: userId}))
+      return true;
+  },
+  remove: function(userId, doc){
+    if(Meteor.users.findOne({_id: userId}))
+      return true; 
+  },
+  update: function(userId, doc){
+    if(Meteor.users.findOne({_id: userId}))
+      return true; 
+  },
+  download: function(userId, doc){
+    if(Meteor.users.findOne({_id: userId}))
+      return true; 
+  }
 });
 
 
@@ -276,7 +317,15 @@ Meteor.methods({
   // Method to return a tasks metadata
   getTaskData: function(resourceId, taskId){
     var result = Async.runSync(function(done){
-      db.query("select technologies, difficulty, time from hasTask where (:resourceId in out and :taskId in in)", {params: {resourceId: resourceId, taskId: taskId}})
+      db.query("select images, technologies, difficulty, time from hasTask where (:resourceId in out and :taskId in in)", {params: {resourceId: resourceId, taskId: taskId}})
+      .then(function(response){done(null, response); });
+    });
+    return result.result;
+  },
+  // Method to return a tasks title
+  getTaskTitle: function(taskId){
+    var result = Async.runSync(function(done){
+      db.query('select title from task where @rid = :taskId', {params: {taskId: taskId}})
       .then(function(response){done(null, response); });
     });
     return result.result;
@@ -433,7 +482,8 @@ Meteor.methods({
       }, 100);
     });
   },
-
+  // update hasTask add technologies=windows where @rid = "#20.0"
+  // update hasTask add technologies = ["Windows"] where @rid = "#20:0"
   ///// Technology Methods
 
   // Method to return all technologies
@@ -455,5 +505,12 @@ Meteor.methods({
       subject: subject,
       text: body
     });
+  },
+
+  ///// Other Methods /////
+
+  //Method to attach an image to a task
+  attachImage: function(resourceId, taskId, imageId){
+    db.query('update hasTask add images = [:imageId] where (:resourceId in out and :taskId in in)', {params: {resourceId: resourceId, taskId: taskId, imageId: imageId}});
   }
 })

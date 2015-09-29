@@ -20,3 +20,8 @@ mrt:flash-messages
 sergeyt:typeahead
 simple:reactive-method
 jeremy:selectize
+cfs:standard-packages
+cfs:s3
+cfs:gridfs
+cfs:ejson-file
+raix:ui-dropped-event

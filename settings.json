@@ -1,4 +1,7 @@
 {
+	"AWSAccessKeyId" : "AKIAJ2TD6QVAJHLPN6AQ",
+  "AWSSecretAccessKey" : "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",
+  "AWSBucket" : "mapr-1",
   "smtpUsername" : "bryankimmons",
   "smtpPassword" : "GMtwelve12",
   "smtpServer" : "smtp.gmail.com",

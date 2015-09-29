@@ -1,8 +1,64 @@
+/////////////// Collections ///////////////
+
+var imageStore = new FS.Store.S3("images");
+Images = new FS.Collection("Images", {
+  stores: [imageStore],
+  filter: {
+    allow: {
+      contentTypes: ['image/*']
+    },
+    onInvalid: function(message) {
+      FlashMessages.sendError("<b>Error</b>. Image upload failed.");
+    }
+  }
+});
+
+
 /////////////// Functions / Helpers ///////////////
+
+// Helper to return a selected user
+Template.registerHelper("resourceFilter", function(){
+  return Session.get('resourceFilter');
+});
+
+// Helper to return an image
+Template.registerHelper("currentImageIndex", function(){
+    return Session.get('imageIndex');
+});
+
+// Helper to return a selected user
+Template.registerHelper("imageResourceId", function(){
+  return Session.get('imageResourceId');
+});
+
+// Helper to return a selected user
+Template.registerHelper("imageOrientId", function(){
+  return Session.get('imageOrientId');
+});
 
 // Helper to return all companies
 Template.registerHelper("companies", function(){
   return ReactiveMethod.call('getCompanies');
+});
+
+// Helper to return all users
+Template.registerHelper("users", function(){
+  return ReactiveMethod.call('getUsers');
+});
+
+// Helper to return all professions
+Template.registerHelper("professions", function(){
+  return ReactiveMethod.call('getProfessions');
+});
+
+// Helper to return all technologies
+Template.registerHelper("technologies", function(){
+  return ReactiveMethod.call('getTechnologies');
+});
+
+// Helper to return all tasks
+Template.registerHelper("tasks", function(){
+  return ReactiveMethod.call('getTasks');
 });
 
 // Helper to return company name
@@ -13,6 +69,30 @@ Template.registerHelper("getCompanyName", function(companyId){
     var result = ReactiveMethod.call('getCompanyName', companyId);
     if(result){
       return result[0].name;
+    }
+  }
+});
+
+// Helper to return user name
+Template.registerHelper("getUserName", function(userId){
+  if(userId){
+    if(userId.cluster)
+     userId = "#" + userId.cluster + ":" + userId.position;
+    var result = ReactiveMethod.call('getUserName', userId);
+    if(result){
+      return result[0].fullName;
+    }
+  }
+});
+
+// Helper to return task title
+Template.registerHelper("getTaskTitle", function(taskId){
+  if(taskId){
+    if(taskId.cluster)
+     taskId = "#" + taskId.cluster + ":" + taskId.position;
+    var result = ReactiveMethod.call('getTaskTitle', taskId);
+    if(result){
+      return result[0].title;
     }
   }
 });
@@ -30,11 +110,6 @@ Template.registerHelper("isCompanyOwner", function(userId, companyId){
   }
 });
 
-// Helper to return all users
-Template.registerHelper("users", function(){
-  return ReactiveMethod.call('getUsers');
-});
-
 // Helper to return users related to a company
 Template.registerHelper("companyUsers", function(companyId){
   if(companyId){
@@ -42,38 +117,6 @@ Template.registerHelper("companyUsers", function(companyId){
       companyId = "#" + companyId.cluster + ":" + companyId.position;
     return ReactiveMethod.call('getCompanyUsers', companyId);
   }
-});
-
-// Helper to return a selected user
-Template.registerHelper("resourceFilter", function(){
-  return Session.get('resourceFilter');
-});
-
-// Helper to return user name
-Template.registerHelper("getUserName", function(userId){
-  if(userId){
-    if(userId.cluster)
-     userId = "#" + userId.cluster + ":" + userId.position;
-    var result = ReactiveMethod.call('getUserName', userId);
-    if(result){
-      return result[0].fullName;
-    }
-  }
-});
-
-// Helper to return all professions
-Template.registerHelper("professions", function(){
-  return ReactiveMethod.call('getProfessions');
-});
-
-// Helper to return all technologies
-Template.registerHelper("technologies", function(){
-  return ReactiveMethod.call('getTechnologies');
-});
-
-// Helper to return all tasks
-Template.registerHelper("tasks", function(){
-  return ReactiveMethod.call('getTasks');
 });
 
 // Helper to return tasks related to a user
@@ -149,9 +192,27 @@ Template.registerHelper("taskData", function(userId, taskId, field){
       userId = "#" + userId.cluster + ":" + userId.position;
     if(taskId.cluster)
       taskId = "#" + taskId.cluster + ":" + taskId.position;
-    var result = ReactiveMethod.call('getTaskData', userId, taskId);
+    var result = ReactiveMethod.call('getTaskData', userId, taskId, field);
     if(result){
-      return result[0][field];
+      if(field == 'imagesNum')
+        return result[0]['images'].length;
+      else if(field == 'images'){
+        var images = result[0]['images'];
+        if(images){
+          images.forEach(function(value, index){
+            images[index] = {"index": index, "imageId": value};
+          });
+          return images;
+        }
+      }
+      else
+        return result[0][field];
     }
   }
+});
+
+// Helper to return an image
+Template.registerHelper("getImage", function(imageId){
+  if(imageId)
+    return Images.find({_id: imageId});
 });
