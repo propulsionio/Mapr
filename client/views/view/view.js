@@ -1,26 +1,16 @@
 /////////////// Events ///////////////
 
 Template.view.events({
-	'click #taskReset': function(e, t){
-		e.preventDefault();
-		Session.set('taskFilter', "");
-	},
-	'click #technologiesReset': function(e, t){
-		e.preventDefault();
-		Session.set('technologiesFilter', "");
-	},
-	'change #resourceFilter': function(e, t){
+	'click #submitFilter': function(e, t){
 	  e.preventDefault();
-	  var selected = $(e.currentTarget).find(':selected');
-	  Session.set('resourceFilter', selected.val());
+	  var task = t.find('#taskFilter').value, technologies = t.find('#technologiesFilter').value,
+	  resource = t.find('#resourceFilter').value, date = t.find('#dateFilter').value;
+	  Session.set({'taskFilter': task, 'technologiesFilter': technologies, 'resourceFilter': resource, 'dateFilter': date});
 	},
-	'click #resourceReset': function(e, t){
+	'click #clearFilter': function(e, t){
 		e.preventDefault();
-		Session.set('resourceFilter', "");
-		$('#resourceFilter').prop('selectedIndex', 0);
-	},
-	'click #dateReset': function(e, t){
-		e.preventDefault();
-		Session.set('dateFilter', "");
+		Session.set({'taskFilter': '', 'technologiesFilter': '', 'resourceFilter': '', 'dateFilter': ''});
+		$('#taskFilter, #technologiesFilter').val('');
+		$('#resourceFilter, #dateFilter').prop('selectedIndex', 0);
 	}
 });

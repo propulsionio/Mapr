@@ -2,47 +2,39 @@
 <template name="view">
 	<div class="container">
 		{{#if currentUser}}
-			<div class="row">
-				<div class="col-md-3">
-					<div class="input-group">
-			      <input type="text" class="form-control" placeholder="Filter by Task">
-			      <span class="input-group-btn">
-			        <button type="button" class="btn btn-default" id="taskReset">x</button>
-			      </span>
-			    </div>
-				</div>
-				<div class="col-md-3">
-					<div class="input-group">
-			      <input type="text" class="form-control" placeholder="Filter by Technologies">
-			      <span class="input-group-btn">
-			        <button type="button" class="btn btn-default" id="technologiesReset">x</button>
-			      </span>
-			    </div>
-				</div>
-				<div class="col-md-3">
-					<div class="input-group">
+			<form id="filterForm">
+				<div class="row">
+					<div class="col-md-1"></div>
+					<div class="col-md-2">
+				    <input type="text" class="form-control" id="taskFilter" placeholder="Task" max="140">
+					</div>
+					<div class="col-md-2">
+				    <input type="text" class="form-control" id="technologiesFilter" placeholder="Technologies">
+					</div>
+					<div class="col-md-2">
 			      <select class="form-control" id="resourceFilter">
-			      	<option value="">Filter by Resource</option>
+			      	<option value="">Resource</option>
 			      	{{#each companyUsers currentUser.profile.companyId}}
 			      		<option value="#{{orientId.cluster}}:{{orientId.position}}">{{fullName}}</option>
 			      	{{/each}}
 			      </select>
-			      <span class="input-group-btn">
-			        <button type="button" class="btn btn-default" id="resourceReset">x</button>
-			      </span>
-			    </div>
-				</div>
-				<div class="col-md-3">
-					<div class="input-group">
+					</div>
+					<div class="col-md-2">
 			      <select class="form-control" id="dateFilter">
-			      	<option value="">Filter by Date</option>
+			      	<option value="">Date</option>
 			      </select>
-			      <span class="input-group-btn">
-			        <button type="button" class="btn btn-default" id="dateReset">x</button>
-			      </span>
-			    </div>
-				</div>	
-			</div>
+					</div>	
+					<div class="col-md-2">
+						<div class="col-md-6">
+							<button class="btn btn-default btn-block" id="submitFilter"><span class="glyphicon glyphicon-check"></span></button>
+						</div>
+						<div class="col-md-6">
+							<button class="btn btn-default btn-block" id="clearFilter"><span class="glyphicon glyphicon-remove"></span></button>
+						</div>
+					</div>
+					<div class="col-md-1"></div>
+				</div>
+			</form>
 			<hr>
 			
 			{{#unless resourceFilter}}
