@@ -1,0 +1,6 @@
+{
+  "smtpUsername" : "bryankimmons",
+  "smtpPassword" : "GMtwelve12",
+  "smtpServer" : "smtp.gmail.com",
+  "smtpPort" : 465
+}

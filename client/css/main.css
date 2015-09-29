@@ -1,0 +1,92 @@
+body{
+	margin-top: 75px;
+}
+.glyphicon{
+	cursor: pointer;
+}
+.alert{
+	width: 33%;
+	position: fixed;
+	top: 0px;
+	right: 0px;
+	z-index: 10000;
+}
+.panel-heading-title{
+  margin: 10px;
+}
+.user-form{
+  max-width: 500px;
+  margin: 0 auto;
+}
+.task-container,
+.subtask-container{
+  text-align: left;
+  border: 1px solid #aaa;
+  border-radius: 5px;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+.subtask-container{
+  margin-left: 50px;
+}
+.technology-container{
+  padding: 3px;
+  border: 1px solid black;
+  border-radius: 5px;
+  overflow: hidden;
+}
+.task-input{
+	height: 50px;
+}
+.task-input,
+.task-input::-webkit-input-placeholder {
+  font-size: 20px;
+  line-height: 2;
+}
+.task-section,
+.new-member-section,
+.new-subtask-section{
+	border: 1px solid #aaa;
+	border-radius: 5px;
+	padding: 10px;
+	margin-bottom: 10px;
+}
+.new-subtask-section{
+  margin-left: 20px
+}
+.scrollable{
+  max-height: 800px;
+  overflow: scroll;
+}
+
+
+/* Typeahead */
+.twitter-typeahead{
+	width: 100%;
+}
+.tt-menu{
+  width: 100%;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 5px;
+}
+.tt-hint{
+  color: #999
+}
+.tt-suggestion{
+  padding: 5px 10px;
+}
+.tt-suggestion.tt-cursor{
+  color: #fff;
+  background-color: #66afe9;
+  border-radius: 5px;
+}
+.tt-suggestion p{
+  margin: 0;
+}
+
+/* Selectize */
+.selectize-control{
+  text-align: left;
+}

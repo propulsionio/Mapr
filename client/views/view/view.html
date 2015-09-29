@@ -1,0 +1,212 @@
+<!-- View Template -->
+<template name="view">
+	<div class="container">
+		{{#if currentUser}}
+			<div class="row">
+				<div class="col-md-3">
+					<div class="input-group">
+			      <input type="text" class="form-control" placeholder="Filter by Task">
+			      <span class="input-group-btn">
+			        <button type="button" class="btn btn-default" id="taskReset">x</button>
+			      </span>
+			    </div>
+				</div>
+				<div class="col-md-3">
+					<div class="input-group">
+			      <input type="text" class="form-control" placeholder="Filter by Technologies">
+			      <span class="input-group-btn">
+			        <button type="button" class="btn btn-default" id="technologiesReset">x</button>
+			      </span>
+			    </div>
+				</div>
+				<div class="col-md-3">
+					<div class="input-group">
+			      <select class="form-control" id="resourceFilter">
+			      	<option value="">Filter by Resource</option>
+			      	{{#each companyUsers currentUser.profile.companyId}}
+			      		<option value="#{{orientId.cluster}}:{{orientId.position}}">{{fullName}}</option>
+			      	{{/each}}
+			      </select>
+			      <span class="input-group-btn">
+			        <button type="button" class="btn btn-default" id="resourceReset">x</button>
+			      </span>
+			    </div>
+				</div>
+				<div class="col-md-3">
+					<div class="input-group">
+			      <select class="form-control" id="dateFilter">
+			      	<option value="">Filter by Date</option>
+			      </select>
+			      <span class="input-group-btn">
+			        <button type="button" class="btn btn-default" id="dateReset">x</button>
+			      </span>
+			    </div>
+				</div>	
+			</div>
+			<hr>
+			
+			{{#unless resourceFilter}}
+				<div class="col-md-12">
+					<h2><small>{{getCompanyName currentUser.profile.companyId}}</small></h2>
+
+					<div class="scrollable">
+							{{#each companyTasks currentUser.profile.companyId 'task'}}
+								<div class="panel panel-default">
+								  <div class="panel-heading" role="tab" id="heading{{orientId.cluster}}{{orientId.position}}">
+								    <h3 class="panel-heading-title">{{title}}
+								    	{{#if hasSubtasks resourceId orientId 'subtask'}}
+								    		<small class="pull-right">{{numSubtasks resourceId orientId 'subtask'}}</small><span class="glyphicon glyphicon-chevron-down pull-right" data-toggle="collapse" href="#collapse{{orientId.cluster}}{{orientId.position}}" aria-expanded="false" aria-controls="collapse{{orientId.cluster}}{{orientId.position}}"></span>
+								    	{{/if}}
+								    </h3>
+								    <div class="row">
+								    	<center class="col-md-12">
+									    	{{#each taskData resourceId orientId 'technologies'}}
+													<div class="col-xs-2 technology-container">
+														{{this}}
+													</div>
+									    	{{/each}}				    	
+									    </center>
+								    </div>
+								    <h5>Resource: {{getUserName resourceId}}</h5>
+								    <h5>Difficulty: {{taskData resourceId orientId 'difficulty'}}</h5>
+								    <h5>Time Estimate: {{taskData resourceId orientId 'time'}}</h5>
+								  </div>
+								  <div id="collapse{{orientId.cluster}}{{orientId.position}}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading{{orientId.cluster}}{{orientId.position}}">
+								    <ul class="list-group">
+								    	{{#each companySubtasks currentUser.profile.companyId orientId 'subtask'}}
+								    		<li class="list-group-item">
+								    			<div class="panel panel-default">
+								    			  <div class="panel-heading" role="tab" id="heading{{orientId.cluster}}{{orientId.position}}">
+								    			    <h4 class="panel-heading-title">{{title}}
+								    			    	{{#if hasSubtasks resourceId orientId 'nestedtask'}}
+								    			    		<small class="pull-right">{{numSubtasks resourceId orientId 'nestedtask'}}</small><span class="glyphicon glyphicon-chevron-down pull-right" data-toggle="collapse" href="#collapse{{orientId.cluster}}{{orientId.position}}" aria-expanded="true" aria-controls="collapse{{orientId.cluster}}{{orientId.position}}"></span>
+								    			    	{{/if}}
+								    			    </h4>
+						    			        <div class="row">
+						    			        	<center class="col-md-12">
+						    			    	    	{{#each taskData resourceId orientId 'technologies'}}
+						    			    					<div class="col-xs-2 technology-container">
+						    			    						{{this}}
+						    			    					</div>
+						    			    	    	{{/each}}				    	
+						    			    	    </center>
+						    			        </div>
+						    			        <h5>Resource: {{getUserName resourceId orientId}}</h5>
+						    			        <h5>Difficulty: {{taskData resourceId orientId 'difficulty'}}</h5>
+						    			        <h5>Time Estimate: {{taskData resourceId orientId 'time'}}</h5>
+								    			  </div>
+								    			  <div id="collapse{{orientId.cluster}}{{orientId.position}}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading{{orientId.cluster}}{{orientId.position}}">
+								    			    <ul class="list-group">
+								    			    	{{#each companySubtasks currentUser.profile.companyId orientId 'nestedtask'}}
+								    			    		<li class="list-group-item">
+								    			    			<div class="well">
+																			<h4 class="panel-heading-title">{{title}}</h4>
+																	    <div class="row">
+																	    	<center class="col-md-12">
+																		    	{{#each taskData resourceId orientId 'technologies'}}
+																						<div class="col-xs-2 technology-container">
+																							{{this}}
+																						</div>
+																		    	{{/each}}				    	
+																		    </center>
+																	    </div>
+																	    <h5>Resource: {{getUserName resourceId orientId}}</h5>
+																	    <h5>Difficulty: {{taskData resourceId orientId 'difficulty'}}</h5>
+																	    <h5>Time Estimate: {{taskData resourceId orientId 'time'}}</h5>
+								    			    			</div>
+								    			    		</li>
+							    			    		{{/each}}
+								    			    </ul>
+								    			  </div>
+								    			</div>
+								    		</li>
+								    	{{/each}}
+								    </ul>
+								  </div>
+								</div>
+							{{/each}}
+					</div>
+				</div>
+			{{else}}
+				<div class="col-md-12">
+					<h2><small>{{getUserName resourceFilter}}</small></h2>
+
+					<div class="scrollable">
+						{{#each userTasks resourceFilter 'task'}}
+							<div class="panel panel-default">
+							  <div class="panel-heading" role="tab" id="heading{{orientId.cluster}}{{orientId.position}}">
+							    <h3 class="panel-heading-title">{{title}}
+							    	{{#if hasSubtasks resourceFilter orientId 'subtask'}}
+							    		<small class="pull-right">{{numSubtasks resourceFilter orientId 'subtask'}}</small><span class="glyphicon glyphicon-chevron-down pull-right" data-toggle="collapse" href="#collapse{{orientId.cluster}}{{orientId.position}}" aria-expanded="false" aria-controls="collapse{{orientId.cluster}}{{orientId.position}}"></span>
+							    	{{/if}}
+							    </h3>
+							    <div class="row">
+							    	<center class="col-md-12">
+								    	{{#each taskData resourceFilter orientId 'technologies'}}
+												<div class="col-xs-2 technology-container">
+													{{this}}
+												</div>
+								    	{{/each}}				    	
+								    </center>
+							    </div>
+							    <h5>Difficulty: {{taskData resourceFilter orientId 'difficulty'}}</h5>
+							    <h5>Time Estimate: {{taskData resourceFilter orientId 'time'}}</h5>
+							  </div>
+							  <div id="collapse{{orientId.cluster}}{{orientId.position}}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading{{orientId.cluster}}{{orientId.position}}">
+							    <ul class="list-group">
+							    	{{#each userSubtasks resourceFilter orientId 'subtask'}}
+							    		<li class="list-group-item">
+							    			<div class="panel panel-default">
+							    			  <div class="panel-heading" role="tab" id="heading{{orientId.cluster}}{{orientId.position}}">
+							    			    <h4 class="panel-heading-title">{{title}}
+							    			    	{{#if hasSubtasks resourceFilter orientId 'nestedtask'}}
+							    			    		<small class="pull-right">{{numSubtasks resourceFilter orientId 'nestedtask'}}</small><span class="glyphicon glyphicon-chevron-down pull-right" data-toggle="collapse" href="#collapse{{orientId.cluster}}{{orientId.position}}" aria-expanded="true" aria-controls="collapse{{orientId.cluster}}{{orientId.position}}"></span>
+							    			    	{{/if}}
+							    			    </h4>
+					    			        <div class="row">
+					    			        	<center class="col-md-12">
+					    			    	    	{{#each taskData resourceFilter orientId 'technologies'}}
+					    			    					<div class="col-xs-2 technology-container">
+					    			    						{{this}}
+					    			    					</div>
+					    			    	    	{{/each}}				    	
+					    			    	    </center>
+					    			        </div>
+					    			        <h5>Difficulty: {{taskData resourceFilter orientId 'difficulty'}}</h5>
+					    			        <h5>Time Estimate: {{taskData resourceFilter orientId 'time'}}</h5>
+							    			  </div>
+							    			  <div id="collapse{{orientId.cluster}}{{orientId.position}}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading{{orientId.cluster}}{{orientId.position}}">
+							    			    <ul class="list-group">
+							    			    	{{#each userSubtasks resourceFilter orientId 'nestedtask'}}
+							    			    		<li class="list-group-item">
+							    			    			<div class="well">
+																		<h5 class="panel-heading-title">{{title}}</h5>
+																    <div class="row">
+																    	<center class="col-md-12">
+																	    	{{#each taskData resourceFilter orientId 'technologies'}}
+																					<div class="col-xs-2 technology-container">
+																						{{this}}
+																					</div>
+																	    	{{/each}}				    	
+																	    </center>
+																    </div>
+																    <h5>Difficulty: {{taskData resourceFilter orientId 'difficulty'}}</h5>
+																    <h5>Time Estimate: {{taskData resourceFilter orientId 'time'}}</h5>
+							    			    			</div>
+							    			    		</li>
+						    			    		{{/each}}
+							    			    </ul>
+							    			  </div>
+							    			</div>
+							    		</li>
+							    	{{/each}}
+							    </ul>
+							  </div>
+							</div>
+						{{/each}}
+					</div>
+				</div>
+			{{/unless}}
+		{{/if}}
+	</div>
+</template>

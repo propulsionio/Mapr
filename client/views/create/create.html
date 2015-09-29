@@ -1,0 +1,47 @@
+<!-- Create Template -->
+<template name="create">
+	<div class="container">
+		<div class="col-md-6 task-section">
+			<form id="createTaskForm">
+				<input type="hidden" id="companyId" value="{{currentUser.profile.companyId}}">
+				<div class="form-group">
+					<input type="text" class="form-control typeahead task-input" id="task" placeholder="Enter a task" maxlength="140" data-source="tasksTypeahead" required>
+				</div>
+				<div class="form-group">
+					<input type="text" class="form-control" id="taskTechnologies" placeholder="Required technologies">
+				</div>
+				<div class="row">
+					<div class="col-md-4">
+						<div class="form-group">
+							<select class="form-control" id="taskResource" required>
+								<option value="">Resource</option>
+								{{#each companyUsers currentUser.profile.companyId}}
+									<option value="#{{orientId.cluster}}:{{orientId.position}}">{{fullName}}</option>
+								{{/each}}
+							</select>
+						</div>
+					</div>
+					<div class="col-md-4">
+						<div class="form-group">
+							<select class="form-control" id="taskDifficulty" required>
+								<option value="">Difficulty</option>
+								<option>Easy</option>
+								<option>Medium</option>
+								<option>Hard</option>
+								<option>Extreme</option>
+							</select>
+						</div>
+					</div>
+					<div class="col-md-4">
+						<div class="form-group">
+							<input type="number" class="form-control" id="taskTime" placeholder="Time Estimate" required>
+						</div>
+					</div>
+				</div>
+				<button type="button" class="btn btn-default btn-block" id="addNewSubtask">Add Subtask</button>
+				<hr>
+				<button type="submit" class="btn btn-default btn-block">Submit</button>
+			</form>
+		</div>
+	</div>
+</template>
