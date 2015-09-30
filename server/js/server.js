@@ -120,14 +120,6 @@ Meteor.methods({
 
   ///// Company Methods
 
-  // Method to return all companies
-  getCompanies: function(){
-    var result = Async.runSync(function(done){
-      db.query('select name from company')
-      .then(function(response){done(null, response); });
-    });
-    return result.result;
-  },
   // Method to create a company in the orient database
   createCompany: function(name, city, state, zipcode, members){
     var date = new Date();
@@ -154,6 +146,14 @@ Meteor.methods({
     });
     return result.result;
   },
+  // Method to return users related to a company
+  getCompanyUsers: function(companyId){
+    var result = Async.runSync(function(done){
+      db.query("select fullName, @rid as orientId from user where :companyId in out('isMemberOf')", {params: {companyId: companyId}})
+      .then(function(response){done(null, response); });
+    });
+    return result.result;
+  },
   // Method to return if user is company owner
   isCompanyOwner: function(userId, companyId){
     var result = Async.runSync(function(done){
@@ -176,22 +176,6 @@ Meteor.methods({
 
   ///// User Methods
 
-  // Method to return all users
-  getUsers: function(){
-    var result = Async.runSync(function(done){
-      db.query('select firstName, lastName, fullName from user')
-      .then(function(response){done(null, response); });
-    });
-    return result.result;
-  },
-  // Method to return users related to a company
-  getCompanyUsers: function(companyId){
-    var result = Async.runSync(function(done){
-      db.query("select fullName, @rid as orientId from user where :companyId in out('isMemberOf')", {params: {companyId: companyId}})
-      .then(function(response){done(null, response); });
-    });
-    return result.result;
-  },
   // Method to create a user in the orient database
   createOrientUser: function(mongoId, email, firstName, lastName, profession, experience, wage, role, companyId){
     var date = new Date();
@@ -237,14 +221,6 @@ Meteor.methods({
 
   ///// Profession Methods
 
-  // Method to return all professions
-  getProfessions: function(){
-    var result = Async.runSync(function(done){
-      db.query('select title, usedCount from profession')
-      .then(function(response){done(null, response); });
-    });
-    return result.result;
-  },
   // Method to return professions for typeahead
   getTypeaheadProfessions: function(query, options){
     query = ("%" + query + "%").toLowerCase();
@@ -257,79 +233,6 @@ Meteor.methods({
 
   ///// Task Methods
 
-  // Method to return all tasks
-  getTasks: function(){
-    var result = Async.runSync(function(done){
-      db.query('select title from task')
-      .then(function(response){done(null, response); });
-    });
-    return result.result;
-  },
-  // Method to return tasks related to a company
-  getCompanyTasks: function(companyId, type){
-    var result = Async.runSync(function(done){
-      db.query("select title, resourceId, @rid as orientId from task where (companyId = :companyId and type = :type)", {params: {companyId: companyId, type: type}})
-      .then(function(response){done(null, response); });
-    });
-    return result.result;
-  },
-  // Method to return subtasks related to a company
-  getCompanySubtasks: function(companyId, taskId, type){
-    var result = Async.runSync(function(done){
-      db.query("select title, resourceId, @rid as orientId from task where (companyId = :companyId and :taskId in in('hasSubtask') and type = :type)", {params: {companyId: companyId, taskId: taskId, type: type}})
-      .then(function(response){done(null, response); });
-    });
-    return result.result;
-  },
-  // Method to return tasks related to a user
-  getUserTasks: function(resourceId, type){
-    var result = Async.runSync(function(done){
-      db.query("select title, @rid as orientId from task where (resourceId = :resourceId and type = :type)", {params: {resourceId: resourceId, type: type}})
-      .then(function(response){done(null, response); });
-    });
-    return result.result;
-  },
-  // Method to return subtasks related to a user
-  getUserSubtasks: function(resourceId, taskId, type){
-    var result = Async.runSync(function(done){
-      db.query("select title, @rid as orientId from task where (resourceId = :resourceId and :taskId in in('hasSubtask') and type = :type)", {params: {resourceId: resourceId, taskId: taskId, type: type}})
-      .then(function(response){done(null, response); });
-    });
-    return result.result;
-  },
-  // Method to return tasks for typeahaed
-  getTypeaheadTasks: function(query, options){
-    query = ("%" + query + "%").toLowerCase();
-    var result = Async.runSync(function(done){
-      db.query('select title, usedCount from task where title.toLowerCase() like :query', {params: {query: query}})
-      .then(function(response){done(null, response); });
-    });
-    return result.result;
-  },
-  // Method to return number of subtasks related to a user
-  getNumSubtasks: function(resourceId, taskId, type){
-    var result = Async.runSync(function(done){
-      db.query("select count(*) from task where (resourceId = :resourceId and :taskId in in('hasSubtask') and type = :type)", {params: {resourceId: resourceId, taskId: taskId, type: type}})
-      .then(function(response){done(null, response); });
-    });
-    return result.result;
-  },
-  // Method to return a tasks metadata
-  getTaskData: function(resourceId, taskId){
-    var result = Async.runSync(function(done){
-      db.query("select images, technologies, difficulty, time from hasTask where (:resourceId in out and :taskId in in)", {params: {resourceId: resourceId, taskId: taskId}})
-      .then(function(response){done(null, response); });
-    });
-    return result.result;
-  },
-  // Method to return a tasks title
-  getTaskTitle: function(taskId){
-    var result = Async.runSync(function(done){
-      db.query('select title from task where @rid = :taskId', {params: {taskId: taskId}})
-      .then(function(response){done(null, response); });
-    });
-    return result.result;
-  },
   // Method to create a task
   createTask: function(task, technologies, companyId, resourceId, difficulty, time, subtasks){
     var date = new Date();
@@ -350,8 +253,10 @@ Meteor.methods({
       }
 
       var taskInterval = setInterval(Meteor.bindEnvironment(function(){
+        console.log("TaskId: " + taskId);
         if(taskId){
           clearInterval(taskInterval);
+          console.log("Task Ready")
 
           db.query('create edge hasTask from (select from user where @rid = :resourceId) to (select from task where @rid = :taskId) set technologies = :technologies, difficulty = :difficulty, time = :time', {params: {taskId: taskId, resourceId: resourceId, technologies: technologies, difficulty: difficulty, time: time}});
           if(technologies){
@@ -373,7 +278,7 @@ Meteor.methods({
               });
             });
           }
-          if(subtasks.length > 1){
+          if(subtasks.length > 0){
             subtasks.forEach(Meteor.bindEnvironment(function(value, index){
               Meteor.call('createSubtask', value.task, value.technologies, companyId, value.resourceId, value.difficulty, value.time, value.subtasks, taskId);
             }));
@@ -395,14 +300,16 @@ Meteor.methods({
         db.query('update task increment usedCount = 1 where @rid = :taskId', {params: {taskId: taskId}});
       }
       else{
-        db.query('insert into task (title, type, companyId, resourceId, usedCount) values (:task, "subtask", :companyId, :resourceId, 1)', {params: {task: task, companyId: companyId, resourceId: resourceId}})
+        db.query('insert into task (createdAt, title, type, companyId, resourceId, usedCount) values (:date, :task, "subtask", :companyId, :resourceId, 1)', {params: {date: date, task: task, companyId: companyId, resourceId: resourceId}})
         .then(function(response){
           taskId = "#" + response[0]['@rid']['cluster'] + ":" + response[0]['@rid']['position'];
         });
       }
       var subtaskInterval = setInterval(Meteor.bindEnvironment(function(){
-        if(taskId){
+        console.log("SubtaskId: " + taskId + ", ParentId: " + parentTask);
+        if(taskId && parentTask){
           clearInterval(subtaskInterval);
+          console.log("Subtask Ready");
 
           db.query('create edge hasTask from (select from user where @rid = :resourceId) to (select from task where @rid = :taskId) set technologies = :technologies, difficulty = :difficulty, time = :time', {params: {taskId: taskId, resourceId: resourceId, technologies: technologies, difficulty: difficulty, time: time}});
           db.query('create edge hasSubtask from (select from task where @rid = :parentTaskId) to (select from task where @rid = :subtaskId)', {params: {parentTaskId: parentTask, subtaskId: taskId}});
@@ -425,7 +332,7 @@ Meteor.methods({
               });
             });
           }
-          if(subtasks.length > 1){
+          if(subtasks.length > 0){
             subtasks.forEach(Meteor.bindEnvironment(function(value, index){
               Meteor.call('createNestedSubtask', value.task, value.technologies, companyId, value.resourceId, value.difficulty, value.time, taskId);
             }));
@@ -453,9 +360,10 @@ Meteor.methods({
         });
       }
       var nestedSubtaskInterval = setInterval(function(){
-        if(parentTask && taskId){
+        console.log("NestedtaskId: " + taskId + ", ParentId: " + parentTask);
+        if(taskId && resourceId && parentTask){
           clearInterval(nestedSubtaskInterval);
-
+          console.log("Nestedtask Ready");
 
           db.query('create edge hasTask from (select from user where @rid = :resourceId) to (select from task where @rid = :taskId) set technologies = :technologies, difficulty = :difficulty, time = :time', {params: {taskId: taskId, resourceId: resourceId, technologies: technologies, difficulty: difficulty, time: time}});
           db.query('create edge hasSubtask from (select from task where @rid = :parentTaskId) to (select from task where @rid = :subtaskId)', {params: {parentTaskId: parentTask, subtaskId: taskId}});
@@ -482,8 +390,79 @@ Meteor.methods({
       }, 100);
     });
   },
-  // update hasTask add technologies=windows where @rid = "#20.0"
-  // update hasTask add technologies = ["Windows"] where @rid = "#20:0"
+  // Method to return tasks
+  getTasks: function(taskFilter, technologiesFilter, resourceFilter, type, parentId){
+    var companyId = Meteor.user().profile.companyId;
+    var taskFilter = ("%" + taskFilter + "%").toLowerCase();
+    var query, technologiesQuery = "", technologiesQuery2 = "";
+    if(technologiesFilter){
+      technologiesFilter = ("'" + technologiesFilter + "'");
+      technologiesQuery = "let $edge = (select in from hasTask where " + technologiesFilter + " in technologies)";
+      technologiesQuery2 = "and @rid in $edge";
+    }
+    var result = Async.runSync(function(done){
+      if(resourceFilter){
+        if(parentId){
+          query = "select title, resourceId, @rid as orientId from task " + technologiesQuery + " where (resourceFilter = :resourceFilter and :parentId in in('hasSubtask') and type = :type and title.toLowerCase() like :taskFilter " + technologiesQuery2 + ")";
+          db.query(query, {params: {resourceFilter: resourceFilter, parentId: parentId, type: type, taskFilter: taskFilter}})
+          .then(function(response){done(null, response); });
+        }
+        else{
+          query = "select title, resourceId, @rid as orientId from task " + technologiesQuery + " where (resourceFilter = :resourceFilter and type = :type and title.toLowerCase() like :taskFilter " + technologiesQuery2 + ")";
+          db.query(query, {params: {resourceFilter: resourceFilter, type: type, taskFilter: taskFilter}})
+          .then(function(response){done(null, response); });
+        }
+      }
+      else{
+        if(parentId){
+          query = "select title, resourceId, @rid as orientId from task " + technologiesQuery + " where (companyId = :companyId and :parentId in in('hasSubtask') and type = :type and title.toLowerCase() like :taskFilter " + technologiesQuery2 + ")";
+          db.query(query, {params: {companyId: companyId, parentId: parentId, type: type, taskFilter: taskFilter}})
+          .then(function(response){done(null, response); });
+        }
+        else{
+          query = "select title, resourceId, @rid as orientId from task " + technologiesQuery + " where (companyId = :companyId and type = :type and title.toLowerCase() like :taskFilter " + technologiesQuery2 + ")";
+          db.query(query, {params: {companyId: companyId, type: type, taskFilter: taskFilter}})
+          .then(function(response){done(null, response); });
+        }
+      }
+      console.log(query);
+    });
+    return result.result;
+  },
+  // Method to return tasks for typeahaed
+  getTypeaheadTasks: function(query, options){
+    query = ("%" + query + "%").toLowerCase();
+    var result = Async.runSync(function(done){
+      db.query('select title, usedCount from task where title.toLowerCase() like :query', {params: {query: query}})
+      .then(function(response){done(null, response); });
+    });
+    return result.result;
+  },
+  // Method to return a tasks title
+  getTaskTitle: function(taskId){
+    var result = Async.runSync(function(done){
+      db.query('select title from task where @rid = :taskId', {params: {taskId: taskId}})
+      .then(function(response){done(null, response); });
+    });
+    return result.result;
+  },
+  // Method to return a tasks metadata
+  getTaskData: function(resourceId, taskId){
+    var result = Async.runSync(function(done){
+      db.query("select images, technologies, difficulty, time from hasTask where (:resourceId in out and :taskId in in)", {params: {resourceId: resourceId, taskId: taskId}})
+      .then(function(response){done(null, response); });
+    });
+    return result.result;
+  },
+  // Method to return number of subtasks related to a user
+  getNumSubtasks: function(resourceId, taskId, type){
+    var result = Async.runSync(function(done){
+      db.query("select count(*) from task where (resourceId = :resourceId and :taskId in in('hasSubtask') and type = :type)", {params: {resourceId: resourceId, taskId: taskId, type: type}})
+      .then(function(response){done(null, response); });
+    });
+    return result.result;
+  },
+
   ///// Technology Methods
 
   // Method to return all technologies
